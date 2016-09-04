@@ -5,4 +5,4 @@ This repository is used for creating and publishing versioned [Docker images of 
 
 The [Docker](https://www.docker.com/) image builds are executed by [Travis CI](https://travis-ci.org/raniemi/docker-phoenix) on [versioned Github branches](https://github.com/raniemi/docker-phoenix/branches).
 
-Currently only the latest version of [Ubuntu](http://www.ubuntu.com/) is supported.
+Currently only [Ubuntu](http://www.ubuntu.com/) and [Debian](https://www.debian.org/) are supported.
