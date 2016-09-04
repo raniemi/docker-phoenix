@@ -1,0 +1,19 @@
+#!/bin/bash
+current_branch=`git rev-parse --abbrev-ref HEAD`
+expected_branches=( `cat releases.txt` )
+existing_branches=( `git ls-remote --heads | cut -c 53- | grep -v master` )
+
+for expected in "${expected_branches[@]}"; do
+  match=0
+  for existing in "${existing_branches[@]}"; do
+    if [[ $existing = "$expected" ]]; then
+        match=1
+        break
+    fi
+  done
+  if [[ $match = 0 ]]; then
+      git checkout -b $expected
+      git push origin $expected 
+      git checkout $current_branch
+  fi
+done

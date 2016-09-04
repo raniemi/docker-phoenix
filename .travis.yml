@@ -1,0 +1,14 @@
+sudo: required
+
+services:
+  - docker
+
+script:
+  - ./bin/docker-build raniemi phoenix
+
+after_success:
+  - ./bin/docker-push raniemi phoenix
+
+notifications:
+  recipients:
+    - dev@lone-cyprus.com

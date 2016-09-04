@@ -1,0 +1,49 @@
+#!/bin/bash
+set -e
+OWNER=$1
+PROJECT=$2
+
+if [[ -z $OWNER || -z $PROJECT ]]; then
+  (>&2 echo "ERROR: Expected the Docker image 'owner' and 'project' to be passed in!" )
+  exit 1
+fi
+
+REPOSITORY=$OWNER/$PROJECT
+BRANCH=$TRAVIS_BRANCH
+
+if [ "$BRANCH" == "master" ]; then
+  echo "INFO: Docker container builds can only happen on versioned branches"
+  exit 0
+fi
+
+PULL_REQUEST=${TRAVIS_PULL_REQUEST:-false} 
+
+if [ "$PULL_REQUEST" != "false" ]; then
+  echo "INFO: Docker container pushes cannot happend on pull requests"
+  exit 0
+fi
+
+versions=(${BRANCH//\// })
+
+if [ ${#versions[@]} -ne 5 ]; then
+  echo "ERROR: Expected the branch to be of the format PHOENIX_VERSION/ELIXIR_VERSION/ERLANG_VERSION/LINUX_DISTRIBUTION/DISTRIBUTION_RELEASE"
+  exit 1
+fi
+
+PHOENIX_VERSION="${versions[0]}"
+ELIXIR_VERSION="${versions[1]}"
+ERLANG_VERSION="${versions[2]}"
+LINUX_DISTRIBUTION="${versions[3]}"
+DISTRIBUTION_RELEASE="${versions[4]}"
+ELIXIR_TAG="${ELIXIR_VERSION}_${ERLANG_VERSION}_${LINUX_DISTRIBUTION}_${DISTRIBUTION_RELEASE}"
+TAG="${PHOENIX_VERSION}_${ELIXIR_TAG}"
+
+# NOTE: since we can't pass these arguments into the docker build, we need to do this instead
+ELIXIR_IMAGE="raniemi/elixir"
+cat <(echo "FROM $ELIXIR_IMAGE:$ELIXIR_TAG") Dockerfile.partial > Dockerfile.generated
+
+docker build \
+  -f Dockerfile.generated \
+  -t $REPOSITORY:$TAG \
+  --build-arg PHOENIX_VERSION=$PHOENIX_VERSION \
+  .
