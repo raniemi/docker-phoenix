@@ -6,6 +6,10 @@ ARG PHOENIX_VERSION=1.2.1
 
 MAINTAINER Ross Niemi <dev@lone-cyprus.com>
 
+# add gpg key
+RUN gpg --recv-keys 379CE192D401AB61 \
+  && gpg --export 379CE192D401AB61 | apt-key add -
+
 # update and install some software requirements
 RUN apt-get update && apt-get upgrade -y && apt-get install -y \
         git
